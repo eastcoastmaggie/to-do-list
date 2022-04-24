@@ -1,0 +1,27 @@
+body{
+    height: 100vh;
+    margin: 0px;
+    padding: 0px;
+    display: grid;
+    grid-template-columns: 26% 2fr;
+    grid-template-rows: 100px 1fr 36px;
+}
+#header{
+    grid-row: 1;
+}
+#content{
+    background-color: #b4ce9f;
+
+    grid-row: 2 / 3;
+    grid-column: 2 / 3;
+}
+#sidebar{
+    background-color: #aabac0;
+    grid-row: 2 / 3;
+    grid-column: 1;
+}
+#page-bottom{
+    background-color: #afaaff;
+    grid-row: 3;
+    grid-column: 1 / 3;
+}
