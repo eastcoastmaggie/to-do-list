@@ -22,6 +22,21 @@ const toDoProto = {
     },
     setStatus(newStatus){
         this.status = newStatus;
+    },
+    setDueDate(newDueDate){
+        this.dueDate = newDueDate;
+    },
+    setName(newName){
+        this.name = newName;
+    },
+    setDescription(newDescription){
+        this.description = newDescription;
+    },
+    setPriority(newPriority){
+        this.priority = newPriority;
+    },
+    setProject(newProject){
+        this.project = newProject;
     }
 
 }
@@ -37,6 +52,8 @@ const toDoFactory = (name, description, project, priority, dueDate) => {
     // use proto to avoid duplication of functions
     return Object.create(toDoProto, {
         name : { 
+            writable: true,
+            configurable: true,
             value: name
         },
         description : {

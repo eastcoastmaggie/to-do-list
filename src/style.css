@@ -78,6 +78,7 @@ body{
     padding:5px 6px;
 
 }
+.due{color:rgb(138, 31, 49);}
 button:hover{
     background-color: rgb(221, 233, 255);
 }
@@ -189,7 +190,7 @@ button:hover{
     display: flex;
 }
 
-.date{
+.due{
     grid-row: 1;
     grid-column: 4;
 }

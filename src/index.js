@@ -81,7 +81,7 @@ const domManager = () => {
         }
         clearContent();
         for (let item in filteredItems){
-            addToContent(drawToDo(filteredItems[item]));        
+            addToContent(drawToDo(filteredItems[item], projects));        
         }
     };
     
