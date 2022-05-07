@@ -29,14 +29,42 @@ const domManager = () => {
     const header = el.querySelector('#header');
     const footer = el.querySelector('#footer');
 
-    const initialDraw = () => {
+    const addTodoButton = () => {
         const addButton = document.createElement('button');
+        addButton.classList.add('add-todo');
         addButton.textContent = "+";
         addButton.addEventListener("click", function(){
             console.log('click');
         });
         addElement(addButton, content);
+    }
+    const addProjectButton = function(){
+        const addButton = document.createElement('button');
+        addButton.classList.add('add-project');
+        addButton.textContent = "+";
+        addButton.addEventListener("click", function(){
+            const inputField = document.createElement('input');
+            inputField.setAttribute('type', 'text');
+            inputField.addEventListener('keypress', function(e){
+                if (e.key === 'Enter'){
+                    e.currentTarget.blur();
+            }
+        });
+            inputField.addEventListener('focusout', function(e){
+                addToProjects(e);
+                this.remove();
+            });
+            
+            addElement(inputField, sidebar);
+            this.remove();
+        
+        });
+        addElement(addButton, sidebar);
     };
+    const addToProjects = function (e){
+        projects.push(projectFactory(e.currentTarget.value));
+        loadProjects();
+    }
 
     const addElement = (element, parent) => {
         
@@ -47,9 +75,9 @@ const domManager = () => {
         addElement(element, content);
     };
 
-    const clearContent = () =>{
-        while (content.firstChild) {
-            content.removeChild(content.lastChild);
+    const clearSection = (section) =>{
+        while (section.firstChild) {
+            section.removeChild(section.lastChild);
           }
     };
     
@@ -57,6 +85,13 @@ const domManager = () => {
         addElement(element, sidebar);
     };
 
+    const loadProjects = () => {
+        clearSection(sidebar);
+        for (let newProject in projects){
+            addToSidebar(drawProject(projects[newProject], todos, filterBy));
+        }
+        addProjectButton();
+    }
     const filterBy = function (project, items){
         let filteredItems = items;
         currentFilter = project.getName();
@@ -79,18 +114,16 @@ const domManager = () => {
                 return false;
             });
         }
-        clearContent();
+        clearSection(content);
         for (let item in filteredItems){
             addToContent(drawToDo(filteredItems[item], projects));        
         }
+        addTodoButton();
     };
     
-    for (let newProject in projects){
-        addToSidebar(drawProject(projects[newProject], todos, filterBy));
-    }
-
+    loadProjects();
+  
     sidebar.firstChild.firstChild.click();
-
 }
 domManager();
 
