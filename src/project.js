@@ -1,7 +1,4 @@
 const projectProto = {
-    draw() {
-        return (this);
-    },
     getName() {
         return this.name;
     }
@@ -12,4 +9,4 @@ const projectFactory = (name) => {
         name : {value : name}
     });
 }
-export { projectFactory };
+export { projectProto, projectFactory };

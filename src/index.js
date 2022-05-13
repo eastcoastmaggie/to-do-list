@@ -1,78 +1,64 @@
+// To do Check list
+// Created by Maggie
+// As part of The Odin Project course work
+// May 2022
+
 import './style.css';
 import { projectFactory } from './project';
-import { toDoFactory } from'./todo';
+import { todoFactory } from'./todo';
 import { drawProject } from './projectManager';
-import { drawToDo } from './todoManager';
-
-let projects = [];
-let todos = [];
-
-projects.push(projectFactory('Everything'));
-projects.push(projectFactory('Due Today'));
-projects.push(projectFactory('Work'));
-projects.push(projectFactory('Home'));
-projects.push(projectFactory('The Odin Project'));
+import { drawTodo } from './todoManager';
+import { storageManager } from './storage';
 
 
-todos.push(toDoFactory('test', 'Test the thing', projects[2], 2, Date()));
-todos.push(toDoFactory('laundry', 'Another', projects[3], 1, Date()));
-todos.push(toDoFactory('taxes', 'Do taxes', projects[3], 3, new Date('2022-04-30')));
+// create main layout
+const main = () => {
 
+    let projects = [];
+    let todos = [];
+    const projectsReplacer = ['name'];
+    const todosReplacer = ['name', 'description', 'dueDate', 'project', 'priority', 'status'];
+    
+    // set up some default projects
+    projects.push(projectFactory('Due Today'));
+    projects.push(projectFactory('Everything'));
+    projects.push(projectFactory('Work'));
+    projects.push(projectFactory('Home'));
+    projects.push(projectFactory('The Odin Project'));
+    
+    // set up some default tasks
+    todos.push(todoFactory('test', 'Test the thing', projects[2], 2, Date()));
+    todos.push(todoFactory('laundry', 'Another', projects[3], 1, Date()));
+    todos.push(todoFactory('taxes', 'Do taxes', projects[3], 3, new Date('2022-04-30')));
+    
+    // load existing projects/tasks from local storage if any
+    // set defaults if not
+    storageManager('projects', projects, projectsReplacer);
+    storageManager('todos', todos, todosReplacer);
+    
 
-
-
-const domManager = () => {
     let currentFilter= '';
     const el = document.querySelector('body');
     const content = el.querySelector('#content');
     const sidebar = el.querySelector('#sidebar');
     const header = el.querySelector('#header');
     const footer = el.querySelector('#footer');
+    const title = document.createElement('h1');
+    title.textContent = 'To Do List';
+    header.appendChild(title);
 
-    const addTodoButton = () => {
-        const addButton = document.createElement('button');
-        addButton.classList.add('add-todo');
-        addButton.textContent = "+";
-        addButton.addEventListener("click", function(){
-            console.log('click');
-        });
-        addElement(addButton, content);
-    }
-    const addProjectButton = function(){
-        const addButton = document.createElement('button');
-        addButton.classList.add('add-project');
-        addButton.textContent = "+";
-        addButton.addEventListener("click", function(){
-            const inputField = document.createElement('input');
-            inputField.setAttribute('type', 'text');
-            inputField.addEventListener('keypress', function(e){
-                if (e.key === 'Enter'){
-                    e.currentTarget.blur();
-            }
-        });
-            inputField.addEventListener('focusout', function(e){
-                addToProjects(e);
-                this.remove();
-            });
-            
-            addElement(inputField, sidebar);
-            this.remove();
-        
-        });
-        addElement(addButton, sidebar);
-    };
-    const addToProjects = function (e){
-        projects.push(projectFactory(e.currentTarget.value));
-        loadProjects();
-    }
 
     const addElement = (element, parent) => {
-        
         parent.appendChild(element);
     };
 
-    const addToContent = (element) => {
-        addElement(element, content);
+    const addNewTodo = function (name, description, projectIndex, priority, dueDate){
+        todos.push(todoFactory(name, description, projects[projectIndex], priority, dueDate));
+    };
+
+    const addNewProject = function (name){
+        projects.push(projectFactory(name));
+        storageManager('projects', projects, projectsReplacer,"set");
     };
 
     const clearSection = (section) =>{
@@ -80,51 +66,90 @@ const domManager = () => {
             section.removeChild(section.lastChild);
           }
     };
+
+    const createProjectButton = function(){
+        const button = document.createElement('button');
+        button.classList.add('add-project');
+        button.textContent = "+";
+        button.addEventListener("click", function(){
+            const inputField = document.createElement('input');
+            inputField.setAttribute('type', 'text');
+            inputField.addEventListener('keypress', function(e){
+                if (e.key === 'Enter'){
+                    e.currentTarget.blur();
+                }
+            });
+            inputField.addEventListener('focusout', function(e){
+                if(e.currentTarget.value != ""){
+                    addNewProject(e.currentTarget.value);
+                
+                }
+                this.remove();
+                loadProjects();
+            });
+            
+            
+            addElement(inputField, sidebar);
+            this.remove();
+            inputField.focus();
+        
+        });
+        addElement(button, sidebar);
+    };
+
+    const createTodoButton = () => {
+        const addButton = document.createElement('button');
+        addButton.classList.add('add-todo');
+        addButton.textContent = "+";
+        addButton.addEventListener("click", function(){
+            addNewTodo("New Item", "New Description", 2, 2, Date());
+            let newRow = drawTodo(todos, (todos.length-1), projects.slice(2,projects.length));
+            addElement(newRow, content);
+            newRow.querySelector('.detail-button').click();
+            this.remove();
+            createTodoButton();
     
-    const addToSidebar = (element) => {
-        addElement(element, sidebar);
+        });
+        addElement(addButton, content);
+    };
+
+    // allow user to filter by projects
+    const filterBy = function (project, items){
+        let filteredItems = items;
+        currentFilter = project.getName();
+        // 
+        if (project.getName() == "Everything"){
+            filteredItems = items;
+        } else if(project.getName() == "Due Today"){
+            filteredItems =  items.filter( item => {
+                let dueAt = item.getDueDate().setHours(0, 0, 0, 0);
+                return dueAt == new Date().setHours(0, 0, 0, 0);
+            });
+        } else {
+            filteredItems = items.filter( item =>   
+                item.getProject() == project.getName()
+            
+            );
+        }
+        clearSection(content);
+        for (let item in filteredItems){
+            addElement(drawTodo(todos, todos.indexOf(filteredItems[item]), projects.slice(2, projects.length)), content);        
+        }
+        createTodoButton();
     };
 
     const loadProjects = () => {
         clearSection(sidebar);
         for (let newProject in projects){
-            addToSidebar(drawProject(projects[newProject], todos, filterBy));
+            addElement(drawProject(projects[newProject], todos, filterBy), sidebar);
         }
-        addProjectButton();
-    }
-    const filterBy = function (project, items){
-        let filteredItems = items;
-        currentFilter = project.getName();
-        if (project.getName() == "Everything"){
-            filteredItems = items;
-        } else if(project.getName() == "Due Today"){
-            filteredItems =  items.filter( (item) => {
-                let dueAt = new Date(item.getDueDate()).setHours(0, 0, 0, 0);
-                if(dueAt == new Date().setHours(0, 0, 0, 0)){
-                    return true;
-                }
-                return false;
-            });
-        } else {
-            filteredItems = items.filter( (item) => {
-                
-                if(item.getProject().getName() == project.getName()){
-                    return true;
-                }
-                return false;
-            });
-        }
-        clearSection(content);
-        for (let item in filteredItems){
-            addToContent(drawToDo(filteredItems[item], projects));        
-        }
-        addTodoButton();
+        createProjectButton();
     };
     
     loadProjects();
   
     sidebar.firstChild.firstChild.click();
 }
-domManager();
+main();
 
 

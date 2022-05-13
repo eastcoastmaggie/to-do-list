@@ -1,7 +1,4 @@
-const toDoProto = {
-    draw() {
-        return (this);
-    },
+const todoProto = {
     getName() {
         return this.name;
     },
@@ -40,7 +37,7 @@ const toDoProto = {
     }
 
 }
-const toDoFactory = (name, description, project, priority, dueDate) => {
+const todoFactory = (name, description, project, priority, dueDate) => {
     let priorities = ['low', 'medium', 'high'];
     let status = 'open'; 
     // set priority default to 'normal' if not in list
@@ -50,7 +47,7 @@ const toDoFactory = (name, description, project, priority, dueDate) => {
         priority = 'normal';
     }
     // use proto to avoid duplication of functions
-    return Object.create(toDoProto, {
+    return Object.create(todoProto, {
         name : { 
             writable: true,
             configurable: true,
@@ -60,6 +57,11 @@ const toDoFactory = (name, description, project, priority, dueDate) => {
             writable: true,
             configurable: true,
             value : description
+        },
+        dueDate : {
+            writable: true,
+            configurable: true,
+            value : dueDate
         },
         project : {
             writable: true,
@@ -71,10 +73,6 @@ const toDoFactory = (name, description, project, priority, dueDate) => {
             configurable: true,
             value : priority
         }, 
-        dueDate : {
-            writable: true,
-            configurable: true,
-            value : dueDate},
         status : { 
             writable: true,
             configurable: true,
@@ -82,4 +80,4 @@ const toDoFactory = (name, description, project, priority, dueDate) => {
         }
     });
 }
-export { toDoFactory };
+export { todoFactory };
